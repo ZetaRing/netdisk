@@ -9,11 +9,11 @@ SAMPLE_RATE=16000
   $5 https://youtube.com/watch?v=$1 \
     --quiet --extract-audio --audio-format wav \
     --output $outname
-#  if [ $? -eq 0 ]; then
-#    # If we don't pipe `yes`, ffmpeg seems to steal a
-#    # character from stdin. I have no idea why.
-#    yes | ffmpeg -loglevel quiet -i $outname -ar $SAMPLE_RATE \
-#      -ss "$2" -to "$3" "${outname}_out.wav"
-#    mv "${outname}_out.wav" "$outname"
-#  fi
+  if [ $? -eq 0 ]; then
+    # If we don't pipe `yes`, ffmpeg seems to steal a
+    # character from stdin. I have no idea why.
+    yes | ffmpeg -loglevel quiet -i $outname -ar $SAMPLE_RATE \
+      -ss "$2" -to "$3" "${outname}_out.wav"
+    mv "${outname}_out.wav" "$outname"
+  fi
 

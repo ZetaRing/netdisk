@@ -78,9 +78,9 @@ class AudioSet(object):
         # Display
         # root_nodes = set(self.nodes).difference(set(itertools.chain.from_iterable(self.node2child.values())))
         # self.print_tree(root_nodes)
-        with open("audio_set/exist.txt", "r") as f:
-            exist = f.readlines()
-        self.exist = [x[:-5].strip("\n") for x in exist]
+        # with open("audio_set/exist.txt", "r") as f:
+        #     exist = f.readlines()
+        # self.exist = [x[:-5].strip("\n") for x in exist]
 
     def get_ids(self, nodes: List[str]):
         nodes = self.iterative_query(nodes, self.node2child)
@@ -91,7 +91,8 @@ class AudioSet(object):
         info = self.meta[self.meta["# YTID"] == audio_id]
         assert len(info) == 1
         _path = os.path.join("audio_set", f"{audio_id}.wav")
-        if (not os.path.exists(_path)) and (audio_id not in self.exist):
+        # if (not os.path.exists(_path)) and (audio_id not in self.exist):
+        if not os.path.exists(_path):
             os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
                       f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0]} "
                       f"{_path} {self.downloader}")
@@ -149,7 +150,7 @@ if __name__ == "__main__":
     # # objaverse = Objaverse()
     audio_set = AudioSet(training_set=True)
 
-    pool = multiprocessing.Pool(1)
+    pool = multiprocessing.Pool(10)
     r = list(tqdm(pool.imap(audio_set.get_audio, audio_set.audio_ids), total=len(audio_set.audio_ids)))
     # node = random.choice(audio_set.nodes)
     # cate_name = audio_set.node2name[node]
