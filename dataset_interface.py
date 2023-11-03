@@ -111,7 +111,11 @@ class AudioSet(object):
         if os.path.exists(_path):
             audio_data, _ = librosa.load(_path, sr=config.RIR_SAMPLING_RATE)
             _t = info['end_seconds'].values[0] - info['start_seconds'].values[0]
-            if len(audio_data) != (_t * 16000): print(f"{audio_id} {len(audio_data)}")
+            if len(audio_data) != (_t * 16000):
+                print(f"{audio_id} {len(audio_data)} {_t}")
+                os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
+                          f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0]} "
+                          f"{_path} {self.downloader}")
         return None, False
 
     @staticmethod
