@@ -166,11 +166,14 @@ if __name__ == "__main__":
 
     _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
     _f = [i.strip(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
-    _f = list(set(_f) & set(audio_set.audio_ids))
-    print(len(_f))
-    r = list(tqdm(pool.imap(audio_set.check_length, _f), total=len(_f)))
-    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
+    for i in _f:
+        if i not in audio_set.audio_ids:
+            os.system(f"rm {os.path.join(_dir, i)}.wav")
 
+    _f = [i.strip(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
+    print(len(_f))
+    # r = list(tqdm(pool.imap(audio_set.check_length, _f), total=len(_f)))
+    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
 
     # def func(x):
     #     os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
