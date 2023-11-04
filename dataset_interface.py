@@ -113,11 +113,12 @@ class AudioSet(object):
         if os.path.exists(_path):
             audio_data, _ = librosa.load(_path, sr=16000)
             _t = info['end_seconds'].values[0] - info['start_seconds'].values[0]
-            if len(audio_data) != (_t * 16000):
-                print(f"{audio_id} {len(audio_data)} {_t}")
-                os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
-                          f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0]} "
-                          f"{_path} {self.downloader}")
+            print(f"{audio_id} {len(audio_data)} {_t}")
+            # if len(audio_data) != (_t * 16000):
+            #     print(f"{audio_id} {len(audio_data)} {_t}")
+                # os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
+                #           f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0]} "
+                #           f"{_path} {self.downloader}")
         return None, False
 
     @staticmethod
@@ -160,17 +161,18 @@ class AudioSet(object):
 
 if __name__ == "__main__":
     # TODO: spilt train and test set (use src_file label for audio files)
-    # audio_set = AudioSet(training_set=True)
+    audio_set = AudioSet(training_set=True)
     pool = multiprocessing.Pool(12)
-    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
 
     _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
-    _f = [os.path.join(_dir, i) for i in os.listdir(_dir) if i.endswith(".wav")]
+    _f = [os.path.join(_dir, i).strip(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
+    r = list(tqdm(pool.imap(audio_set.check_length, _f), total=len(audio_set)))
+    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
 
-    print(len(_f))
-    def func(x):
-        os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
-    r = list(tqdm(pool.imap(func, _f), total=len(_f)))
+
+    # def func(x):
+    #     os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
+    # r = list(tqdm(pool.map(func, _f), total=len(_f)))
 
     # with open("all.txt") as f:
     #     all = f.readlines()
