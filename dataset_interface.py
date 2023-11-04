@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     def func(x):
         os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
-    r = list(tqdm(pool.imap(func, _f), total=len(_f)))
+    pool.map(func, _f)
 
     # with open("all.txt") as f:
     #     all = f.readlines()
