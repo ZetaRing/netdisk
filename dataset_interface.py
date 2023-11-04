@@ -167,9 +167,10 @@ if __name__ == "__main__":
     _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
     _f = [os.path.join(_dir, i) for i in os.listdir(_dir) if i.endswith(".wav")]
 
+    print(len(_f))
     def func(x):
         os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
-    pool.map(func, _f)
+    r = list(tqdm(pool.imap(func, _f), total=len(_f)))
 
     # with open("all.txt") as f:
     #     all = f.readlines()
