@@ -168,7 +168,7 @@ if __name__ == "__main__":
     _f = [os.path.join(_dir, i) for i in os.listdir(_dir) if i.endswith(".wav")]
 
     def func(x):
-        os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration"')
+        os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
     r = list(tqdm(pool.imap(func, _f), total=len(_f)))
 
     # with open("all.txt") as f:
