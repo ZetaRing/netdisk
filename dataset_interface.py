@@ -8,12 +8,14 @@ import copy
 from collections import defaultdict
 import itertools
 from tqdm import tqdm
+import librosa
+from datetime import datetime
 
 
 # TODO: include evaluation set
 class AudioSet(object):
     def __init__(self, training_set=True):
-        self.dir_path = "audio_set"
+        self.dir_path = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
 
         # Load
         ontology = json.load(open(os.path.join(self.dir_path, "ontology.json"), "r"))
@@ -109,7 +111,7 @@ class AudioSet(object):
         _path = os.path.join(self.dir_path, f"{audio_id}.wav")
 
         if os.path.exists(_path):
-            audio_data, _ = librosa.load(_path, sr=config.RIR_SAMPLING_RATE)
+            audio_data, _ = librosa.load(_path, sr=16000)
             _t = info['end_seconds'].values[0] - info['start_seconds'].values[0]
             if len(audio_data) != (_t * 16000):
                 print(f"{audio_id} {len(audio_data)} {_t}")
@@ -158,18 +160,43 @@ class AudioSet(object):
 
 if __name__ == "__main__":
     # TODO: spilt train and test set (use src_file label for audio files)
-    # # hm3d = HM3D()
-    # # objaverse = Objaverse()
-    audio_set = AudioSet(training_set=True)
-
+    # audio_set = AudioSet(training_set=True)
     pool = multiprocessing.Pool(12)
-    r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
-    # node = random.choice(audio_set.nodes)
-    # cate_name = audio_set.node2name[node]
-    # audio_id = random.choice(audio_set.get_ids([node]))
-    # audio, success = audio_set.get_audio(audio_id)
-    # print(cate_name, audio_id, audio.shape, success)
-    
-    # object_folder = ObjectFolder()
-    # print (object_folder.get_objects("spoon (Steel)"))
+    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
 
+    _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
+    _f = [os.path.join(_dir, i) for i in os.listdir(_dir) if i.endswith(".wav")]
+
+    def func(x):
+        os.system("duration=$(ffprobe" + x + " 2>&1 | awk '/Duration/ { print $2 }') && echo -e '$duration\t$file'")
+    r = list(tqdm(pool.imap(func, _f), total=len(_f)))
+
+    # with open("all.txt") as f:
+    #     all = f.readlines()
+    # all = [x.strip().removesuffix(".wav") for x in all]
+    #
+    # with open("empty.txt") as f:
+    #     empty = f.readlines()
+    # empty = [x.strip().removesuffix(".wav").removeprefix("/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set/") for x in empty]
+    #
+    # with open("list.txt") as f:
+    #     duration = f.readlines()
+    # duration = [x.strip() for x in duration]
+    #
+    # date_format = '%H:%M:%S.%f'
+    # std = datetime.strptime("00:00:10.00", date_format)
+    # dur = []
+    # wro = []
+    # for i in duration:
+    #     d, w = i.split("\t")
+    #     w = w.removesuffix(".wav").removeprefix("/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set/")
+    #     d = d.removeprefix("-e ").removesuffix(",")
+    #     dur.append(w)
+    #
+    #     if (len(d) != 0) and (d != "N/A"):
+    #         d = datetime.strptime(d, date_format)
+    #         if d != std:
+    #             wro.append(w)
+    #     else:
+    #         wro.append(w)
+    # pass
