@@ -16,6 +16,7 @@ from datetime import datetime
 class AudioSet(object):
     def __init__(self, training_set=True):
         self.dir_path = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
+        # self.dir_path = "./audio_set"
 
         # Load
         ontology = json.load(open(os.path.join(self.dir_path, "ontology.json"), "r"))
@@ -165,45 +166,42 @@ class AudioSet(object):
 if __name__ == "__main__":
     # TODO: spilt train and test set (use src_file label for audio files)
     audio_set = AudioSet(training_set=True)
+    with open("error.txt", "r") as f:
+        _id = f.readlines()
+    _id = [x.strip("\n") for x in _id]
+
+    # _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
+    # _f = [i.removesuffix(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
+    # print(len(_f))
+    # print(len(list(set(_f) & set(audio_set.audio_ids))))
     pool = multiprocessing.Pool(12)
+    r = list(tqdm(pool.imap(audio_set.get_audio, _id), total=len(_id)))
 
-    _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
-    _f = [i.removesuffix(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
-    print(len(_f))
-    print(len(list(set(_f) & set(audio_set.audio_ids))))
-    r = list(tqdm(pool.imap(audio_set.check_length, _f), total=len(_f)))
-    # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
-
-    # def func(x):
-    #     os.system('duration=$(ffprobe "' + x + '" 2>&1 | awk "/Duration/ { print $2 }") && echo -e "$duration\t"' +x)
-    # r = list(tqdm(pool.map(func, _f), total=len(_f)))
-
-    # with open("all.txt") as f:
-    #     all = f.readlines()
-    # all = [x.strip().removesuffix(".wav") for x in all]
+    # with open("dur.txt") as f:
+    #     dur = f.readlines()
+    # dur = [x.strip().removesuffix(".wav") for x in dur]
     #
-    # with open("empty.txt") as f:
-    #     empty = f.readlines()
-    # empty = [x.strip().removesuffix(".wav").removeprefix("/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set/") for x in empty]
-    #
-    # with open("list.txt") as f:
-    #     duration = f.readlines()
-    # duration = [x.strip() for x in duration]
+    # with open("dur2.txt") as f:
+    #     dur2 = f.readlines()
+    # dur2 = [x.strip().removesuffix(".wav") for x in dur2]
     #
     # date_format = '%H:%M:%S.%f'
     # std = datetime.strptime("00:00:10.00", date_format)
-    # dur = []
+    # tot = []
     # wro = []
-    # for i in duration:
+    # nan = []
+    # for i in dur + dur2:
     #     d, w = i.split("\t")
-    #     w = w.removesuffix(".wav").removeprefix("/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set/")
     #     d = d.removeprefix("-e ").removesuffix(",")
-    #     dur.append(w)
+    #     tot.append(w)
     #
     #     if (len(d) != 0) and (d != "N/A"):
     #         d = datetime.strptime(d, date_format)
     #         if d != std:
     #             wro.append(w)
     #     else:
-    #         wro.append(w)
-    # pass
+    #         nan.append(w)
+    # a = list(set(wro + nan))
+    # with open("error.txt", "w") as f:
+    #     f.writelines([x+"\n" for x in a])
+    pass
