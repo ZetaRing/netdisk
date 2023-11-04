@@ -169,6 +169,8 @@ if __name__ == "__main__":
     with open("error.txt", "r") as f:
         _id = f.readlines()
     _id = [x.strip("\n") for x in _id]
+    print(len(_id))
+    _id = list(set(_id) & set(audio_set.audio_ids))
 
     # _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
     # _f = [i.removesuffix(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
