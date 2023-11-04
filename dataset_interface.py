@@ -165,12 +165,9 @@ if __name__ == "__main__":
     pool = multiprocessing.Pool(12)
 
     _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
-    _f = [os.path.join(_dir, i).strip(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
-    for i in _f:
-        if i not in audio_set.audio_ids:
-            print(i)
-    pr
-
+    _f = [i.strip(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
+    _f = list(set(_f) & set(audio_set.audio_ids))
+    print(len(_f))
     r = list(tqdm(pool.imap(audio_set.check_length, _f), total=len(_f)))
     # r = list(tqdm(pool.imap(audio_set.check_length, audio_set.audio_ids), total=len(audio_set.audio_ids)))
 
