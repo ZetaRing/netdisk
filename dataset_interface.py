@@ -111,9 +111,12 @@ class AudioSet(object):
         _path = os.path.join(self.dir_path, f"{audio_id}.wav")
 
         if os.path.exists(_path):
-            audio_data, _ = librosa.load(_path, sr=16000)
             _t = info['end_seconds'].values[0] - info['start_seconds'].values[0]
-            print(f"{audio_id} {len(audio_data)} {_t}")
+            try:
+                audio_data, _ = librosa.load(_path, sr=16000)
+                print(f"{audio_id} {len(audio_data)} {_t}")
+            except:
+                print(f"{audio_id} 0 {_t}")
             # if len(audio_data) != (_t * 16000):
             #     print(f"{audio_id} {len(audio_data)} {_t}")
                 # os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
