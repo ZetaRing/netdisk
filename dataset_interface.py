@@ -165,45 +165,45 @@ class AudioSet(object):
 
 if __name__ == "__main__":
     # TODO: spilt train and test set (use src_file label for audio files)
-    audio_set = AudioSet(training_set=True)
-    with open("error.txt", "r") as f:
-        _id = f.readlines()
-    _id = [x.strip("\n") for x in _id]
-    print(len(_id))
-    _id = list(set(_id) & set(audio_set.audio_ids))
+    # audio_set = AudioSet(training_set=True)
+    # with open("error.txt", "r") as f:
+    #     _id = f.readlines()
+    # _id = [x.strip("\n") for x in _id]
+    # print(len(_id))
+    # _id = list(set(_id) & set(audio_set.audio_ids))
 
     # _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
     # _f = [i.removesuffix(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
     # print(len(_f))
     # print(len(list(set(_f) & set(audio_set.audio_ids))))
-    pool = multiprocessing.Pool(12)
-    r = list(tqdm(pool.imap(audio_set.get_audio, _id), total=len(_id)))
+    # pool = multiprocessing.Pool(12)
+    # r = list(tqdm(pool.imap(audio_set.get_audio, _id), total=len(_id)))
 
-    # with open("dur.txt") as f:
-    #     dur = f.readlines()
-    # dur = [x.strip().removesuffix(".wav") for x in dur]
-    #
-    # with open("dur2.txt") as f:
-    #     dur2 = f.readlines()
-    # dur2 = [x.strip().removesuffix(".wav") for x in dur2]
-    #
-    # date_format = '%H:%M:%S.%f'
-    # std = datetime.strptime("00:00:10.00", date_format)
-    # tot = []
-    # wro = []
-    # nan = []
-    # for i in dur + dur2:
-    #     d, w = i.split("\t")
-    #     d = d.removeprefix("-e ").removesuffix(",")
-    #     tot.append(w)
-    #
-    #     if (len(d) != 0) and (d != "N/A"):
-    #         d = datetime.strptime(d, date_format)
-    #         if d != std:
-    #             wro.append(w)
-    #     else:
-    #         nan.append(w)
-    # a = list(set(wro + nan))
-    # with open("error.txt", "w") as f:
-    #     f.writelines([x+"\n" for x in a])
+    with open("dur.txt") as f:
+        dur = f.readlines()
+    dur = [x.strip().removesuffix(".wav") for x in dur]
+
+    with open("dur2.txt") as f:
+        dur2 = f.readlines()
+    dur2 = [x.strip().removesuffix(".wav") for x in dur2]
+
+    date_format = '%H:%M:%S.%f'
+    std = datetime.strptime("00:00:10.00", date_format)
+    tot = []
+    wro = []
+    nan = []
+    for i in dur + dur2:
+        d, w = i.split("\t")
+        d = d.removeprefix("-e ").removesuffix(",")
+        tot.append(w)
+
+        if (len(d) != 0) and (d != "N/A"):
+            d = datetime.strptime(d, date_format)
+            if d != std:
+                wro.append(w)
+        else:
+            nan.append(w)
+    a = list(set(wro + nan))
+    with open("error.txt", "w") as f:
+        f.writelines([x+"\n" for x in a])
     pass
