@@ -15,8 +15,8 @@ from datetime import datetime
 # TODO: include evaluation set
 class AudioSet(object):
     def __init__(self, training_set=True):
-        self.dir_path = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
-        # self.dir_path = "./audio_set"
+        # self.dir_path = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
+        self.dir_path = "./audio_set"
 
         # Load
         ontology = json.load(open(os.path.join(self.dir_path, "ontology.json"), "r"))
@@ -26,52 +26,56 @@ class AudioSet(object):
             meta_file = "eval_segments.csv"
         meta = pd.read_csv(os.path.join(self.dir_path, meta_file), sep=", ", engine='python', skiprows=2)
 
+        self.meta = meta
+        self.audio_ids = list(meta["# YTID"])
+
+
         # Set selected categories
         # Ontology is a graph, not a tree. query_handles is visible tree roots.
-        query_handles = ["Music", "Sounds of things"]
-        valid_cate = ["Musical instrument", "Domestic sounds, home sounds", "Liquid", "Glass", "Printer",
-                      "Air conditioning", "Mechanical fan", "Clock", "Fire alarm", "Smoke detector, smoke alarm",
-                      "Doorbell", "Alarm clock", "Ringtone", "Telephone bell ringing", "Domestic sounds, home sounds",
-                      "Loudspeaker", "Radio", "Television", "MP3", "Domestic animals, pets"]
-        block_cate = ["Human sounds", "Vehicle"]
-
-        # Put audios on the node.
-        name2node = {x["name"]: x["id"] for x in ontology}
-        node2child = {x["id"]: x["child_ids"] for x in ontology}
-        valid_nodes = self.iterative_query([name2node[x] for x in valid_cate], query_dict=node2child)
-        block_nodes = self.iterative_query([name2node[x] for x in block_cate], query_dict=node2child)
-
-        self._node2audio = defaultdict(list)
-        for id, labels in zip(meta["# YTID"], meta["positive_labels"]):
-            labels = set(labels.strip('"').split(","))
-            if len(labels & block_nodes): continue
-            for i in (labels & valid_nodes):
-                self._node2audio[i].append(id)
-
-        # Pruning nodes without audios
-        self.nodes = list()
-        for i in [x["id"] for x in ontology]:
-            nodes = self.iterative_query([i], node2child)
-            if any(len(self._node2audio[x]) for x in nodes):
-                self.nodes.append(i)
-
-        query_nodes = self.iterative_query([name2node[x] for x in query_handles], query_dict=node2child)
-        self.nodes = list(set(self.nodes) & query_nodes)
-
-        filtered_ontology = [x for x in ontology if x["id"] in self.nodes]
-        self.node2name = {x["id"]: x["name"] for x in filtered_ontology}
-        self.node2description = {x["id"]: x["description"] for x in filtered_ontology}
-        self.node2child = {x["id"]: (set(x["child_ids"]) & set(self.nodes)) for x in filtered_ontology}
-        self.node2father = defaultdict(list)
-        for k, v in self.node2child.items():
-            for i in v:
-                self.node2father[i].append(k)
-
-        # Others
-        self.audio_ids = self.get_ids(self.nodes)
-        self.meta = meta[meta["# YTID"].isin(self.audio_ids)]
+        # query_handles = ["Music", "Sounds of things"]
+        # valid_cate = ["Musical instrument", "Domestic sounds, home sounds", "Liquid", "Glass", "Printer",
+        #               "Air conditioning", "Mechanical fan", "Clock", "Fire alarm", "Smoke detector, smoke alarm",
+        #               "Doorbell", "Alarm clock", "Ringtone", "Telephone bell ringing", "Domestic sounds, home sounds",
+        #               "Loudspeaker", "Radio", "Television", "MP3", "Domestic animals, pets"]
+        # block_cate = ["Human sounds", "Vehicle"]
+        #
+        # # Put audios on the node.
+        # name2node = {x["name"]: x["id"] for x in ontology}
+        # node2child = {x["id"]: x["child_ids"] for x in ontology}
+        # valid_nodes = self.iterative_query([name2node[x] for x in valid_cate], query_dict=node2child)
+        # block_nodes = self.iterative_query([name2node[x] for x in block_cate], query_dict=node2child)
+        #
+        # self._node2audio = defaultdict(list)
+        # for id, labels in zip(meta["# YTID"], meta["positive_labels"]):
+        #     labels = set(labels.strip('"').split(","))
+        #     if len(labels & block_nodes): continue
+        #     for i in (labels & valid_nodes):
+        #         self._node2audio[i].append(id)
+        #
+        # # Pruning nodes without audios
+        # self.nodes = list()
+        # for i in [x["id"] for x in ontology]:
+        #     nodes = self.iterative_query([i], node2child)
+        #     if any(len(self._node2audio[x]) for x in nodes):
+        #         self.nodes.append(i)
+        #
+        # query_nodes = self.iterative_query([name2node[x] for x in query_handles], query_dict=node2child)
+        # self.nodes = list(set(self.nodes) & query_nodes)
+        #
+        # filtered_ontology = [x for x in ontology if x["id"] in self.nodes]
+        # self.node2name = {x["id"]: x["name"] for x in filtered_ontology}
+        # self.node2description = {x["id"]: x["description"] for x in filtered_ontology}
+        # self.node2child = {x["id"]: (set(x["child_ids"]) & set(self.nodes)) for x in filtered_ontology}
+        # self.node2father = defaultdict(list)
+        # for k, v in self.node2child.items():
+        #     for i in v:
+        #         self.node2father[i].append(k)
+        #
+        # # Others
+        # self.audio_ids = self.get_ids(self.nodes)
+        # self.meta = meta[meta["# YTID"].isin(self.audio_ids)]
         self.downloader = os.path.join("third_party", "youtube-dl")
-        print(f"AudioSet {meta_file}: {len(self.meta)} / {len(meta)}, cate {len(self.nodes)} / {len(ontology)}")
+        print(f"AudioSet {meta_file}: {len(self.meta)} / {len(meta)}, {len(ontology)}")
 
         # _str = self.meta.to_csv(index=False, sep="\t") # Stupid Lib
         # _str = _str.replace("\t", ", ")
@@ -91,10 +95,10 @@ class AudioSet(object):
         info = self.meta[self.meta["# YTID"] == audio_id]
         assert len(info) == 1
         _path = os.path.join(self.dir_path, f"{audio_id}.wav")
-        os.system(f"rm {_path}")
-        if True:  # not os.path.exists(_path):
+        # os.system(f"rm {_path}")
+        if not os.path.exists(_path):
             os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
-                      f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0]} "
+                      f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0] - info['start_seconds'].values[0]} "
                       f"{_path} {self.downloader}")
 
         audio_data = None
@@ -165,17 +169,18 @@ class AudioSet(object):
 if __name__ == "__main__":
     # TODO: spilt train and test set (use src_file label for audio files)
     audio_set = AudioSet(training_set=True)
-    with open("error.txt", "r") as f:
-        _id = f.readlines()
-    _id = [x.strip("\n") for x in _id]
-    print(len(_id))
-    _id = list(set(_id) & set(audio_set.audio_ids))
-    print(len(_id))
+    # with open("error.txt", "r") as f:
+    #     _id = f.readlines()
+    # _id = [x.strip("\n") for x in _id]
+    # print(len(_id))
+    # _id = list(set(_id) & set(audio_set.audio_ids))
+    # print(len(_id))
 
     # _dir = "/media/zfchen/048c6a59-054e-45ae-aa0e-1e437096b891/zeta/audio_set"
     # _f = [i.removesuffix(".wav") for i in os.listdir(_dir) if i.endswith(".wav")]
     # print(len(_f))
     # print(len(list(set(_f) & set(audio_set.audio_ids))))
+    _id = sorted(audio_set.audio_ids)
     pool = multiprocessing.Pool(12)
     r = list(tqdm(pool.imap(audio_set.get_audio, _id), total=len(_id)))
 
