@@ -28,7 +28,7 @@ class AudioSet(object):
 
         self.meta = meta
         self.audio_ids = list(meta["# YTID"])
-
+        self.info = dict(zip(self.meta["# YTID"], zip(self.meta["start_seconds"], self.meta["end_seconds"])))
 
         # Set selected categories
         # Ontology is a graph, not a tree. query_handles is visible tree roots.
@@ -92,13 +92,12 @@ class AudioSet(object):
 
     def get_audio(self, audio_id):
         assert audio_id in self.audio_ids # YTID is unique in training set
-        info = self.meta[self.meta["# YTID"] == audio_id]
-        assert len(info) == 1
+        info = self.info[audio_id]
         _path = os.path.join(self.dir_path, f"{audio_id}.wav")
         # os.system(f"rm {_path}")
         if not os.path.exists(_path):
             os.system(f"sh {os.path.join('third_party', 'fetch_audio.sh')} "
-                      f"{audio_id} {info['start_seconds'].values[0]} {info['end_seconds'].values[0] - info['start_seconds'].values[0]} "
+                      f"{audio_id} {info[0]} {info[1] - info[0]} "
                       f"{_path} {self.downloader}")
 
         audio_data = None
